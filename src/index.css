@@ -6,13 +6,13 @@
 
 @layer base {
   :root {
-    --background: 220 25% 6%;
+    --background: 220 50% 2%;
     --foreground: 200 20% 90%;
 
-    --card: 220 20% 10%;
+    --card: 220 30% 6%;
     --card-foreground: 200 20% 90%;
 
-    --popover: 220 20% 10%;
+    --popover: 220 30% 6%;
     --popover-foreground: 200 20% 90%;
 
     --primary: 175 80% 50%;
@@ -21,8 +21,8 @@
     --secondary: 260 60% 55%;
     --secondary-foreground: 200 20% 95%;
 
-    --muted: 220 15% 15%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 220 20% 12%;
+    --muted-foreground: 220 10% 65%;
 
     --accent: 45 100% 55%;
     --accent-foreground: 220 25% 6%;
@@ -30,8 +30,8 @@
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
+    --border: 220 25% 15%;
+    --input: 220 25% 15%;
     --ring: 175 80% 50%;
 
     --radius: 0.5rem;
@@ -44,24 +44,24 @@
     --glow-danger: 0 75% 55%;
 
     /* Element category colors */
-    --cat-alkali: 0 70% 55%;
-    --cat-alkaline: 25 80% 55%;
-    --cat-transition: 45 80% 50%;
-    --cat-post-transition: 120 40% 45%;
-    --cat-metalloid: 160 50% 45%;
-    --cat-nonmetal: 175 70% 45%;
-    --cat-halogen: 200 70% 55%;
-    --cat-noble: 260 60% 55%;
-    --cat-lanthanide: 300 50% 50%;
-    --cat-actinide: 330 60% 50%;
+    --cat-alkali: 0 80% 60%;
+    --cat-alkaline: 25 90% 60%;
+    --cat-transition: 45 90% 55%;
+    --cat-post-transition: 120 50% 50%;
+    --cat-metalloid: 160 60% 50%;
+    --cat-nonmetal: 175 80% 50%;
+    --cat-halogen: 200 80% 60%;
+    --cat-noble: 260 70% 60%;
+    --cat-lanthanide: 300 60% 55%;
+    --cat-actinide: 330 70% 55%;
 
-    --sidebar-background: 220 20% 10%;
+    --sidebar-background: 220 30% 5%;
     --sidebar-foreground: 200 20% 90%;
     --sidebar-primary: 175 80% 50%;
     --sidebar-primary-foreground: 220 25% 6%;
-    --sidebar-accent: 220 15% 15%;
+    --sidebar-accent: 220 20% 12%;
     --sidebar-accent-foreground: 200 20% 90%;
-    --sidebar-border: 220 15% 18%;
+    --sidebar-border: 220 25% 15%;
     --sidebar-ring: 175 80% 50%;
   }
 }
@@ -73,6 +73,8 @@
 
   body {
     @apply bg-background text-foreground font-body antialiased;
+    background-image: radial-gradient(circle at 50% -20%, hsl(220 30% 12%) 0%, hsl(var(--background)) 70%);
+    background-attachment: fixed;
   }
 }
 

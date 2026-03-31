@@ -1,13 +1,15 @@
-import { useState, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useCallback, useEffect, type ReactNode } from "react";
+import { motion } from "framer-motion";
 import { elements, categoryLabels } from "@/data/elements";
 import type { Element } from "@/data/elements";
 import { Button } from "@/components/ui/button";
-import { Trophy, Flame, Heart, ArrowRight, RotateCcw, Sparkles, Star, Zap } from "lucide-react";
+import { Trophy, Flame, Heart, RotateCcw, Sparkles, Star, Zap } from "lucide-react";
+import { playCorrectSound, playWrongSound, playLevelUpSound } from "@/lib/audio";
+import { QuizQuestionCard } from "./QuizQuestionCard";
 
-type QuestionType = "symbol-to-name" | "name-to-symbol" | "number-to-name" | "category-quiz" | "fact-quiz";
+export type QuestionType = "symbol-to-name" | "name-to-symbol" | "number-to-name" | "category-quiz" | "fact-quiz" | "group-guess" | "period-guess" | "mass-guess";
 
-interface Question {
+export interface Question {
   type: QuestionType;
   prompt: string;
   correctAnswer: string;
@@ -15,7 +17,7 @@ interface Question {
   element: Element;
 }
 
-const QUESTION_TYPES: QuestionType[] = ["symbol-to-name", "name-to-symbol", "number-to-name", "category-quiz", "fact-quiz"];
+const QUESTION_TYPES: QuestionType[] = ["symbol-to-name", "name-to-symbol", "number-to-name", "category-quiz", "fact-quiz", "group-guess", "period-guess", "mass-guess"];
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -55,6 +57,20 @@ function generateQuestion(): Question {
     case "fact-quiz": {
       const options = shuffle([el.name, ...others.slice(0, 3).map((e) => e.name)]);
       return { type, prompt: `Which element: "${el.fun_fact}"?`, correctAnswer: el.name, options, element: el };
+    }
+    case "group-guess": {
+      const validOthers = others.filter(o => o.group !== el.group);
+      const options = shuffle([el.name, ...validOthers.slice(0, 3).map((e) => e.name)]);
+      return { type, prompt: `Which of these elements is in Group ${el.group}?`, correctAnswer: el.name, options, element: el };
+    }
+    case "period-guess": {
+      const validOthers = others.filter(o => o.period !== el.period);
+      const options = shuffle([el.name, ...validOthers.slice(0, 3).map((e) => e.name)]);
+      return { type, prompt: `Which element is found in Period ${el.period}?`, correctAnswer: el.name, options, element: el };
+    }
+    case "mass-guess": {
+      const options = shuffle([el.name, ...others.slice(0, 3).map((e) => e.name)]);
+      return { type, prompt: `Which element has an atomic mass of ${el.mass}?`, correctAnswer: el.name, options, element: el };
     }
   }
 }
@@ -119,6 +135,7 @@ const ElementQuiz = () => {
     setQuestionCount((c) => c + 1);
 
     if (correct) {
+      playCorrectSound();
       const streakBonus = Math.floor(streak / 3) * 5;
       const points = 10 + streakBonus;
       setScore((s) => s + points);
@@ -128,8 +145,12 @@ const ElementQuiz = () => {
       const newXp = xp + points;
       setXp(newXp);
       const newLevel = Math.floor(newXp / 50) + 1;
+      if (newLevel > level) {
+        setTimeout(playLevelUpSound, 500);
+      }
       setLevel(newLevel);
     } else {
+      playWrongSound();
       setStreak(0);
       const newLives = lives - 1;
       setLives(newLives);
@@ -269,78 +290,19 @@ const ElementQuiz = () => {
       </div>
 
       {/* Question */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={question.prompt}
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -30 }}
-          className="w-full"
-        >
-          <div className="text-center mb-5">
-            <p className="text-lg font-medium text-foreground">{question.prompt}</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            {question.options.map((opt) => {
-              let variant: "outline" | "default" | "destructive" = "outline";
-              let extra = "";
-              if (selected) {
-                if (opt === question.correctAnswer) {
-                  extra = "border-green-500 bg-green-500/10 glow-success";
-                } else if (opt === selected && !isCorrect) {
-                  extra = "border-destructive bg-destructive/10 glow-danger";
-                }
-              }
-              return (
-                <motion.div key={opt} whileHover={!selected ? { scale: 1.03 } : {}} whileTap={!selected ? { scale: 0.97 } : {}}>
-                  <button
-                    disabled={!!selected}
-                    onClick={() => handleAnswer(opt)}
-                    className={`
-                      w-full py-3 px-4 rounded-lg border border-border text-sm font-medium
-                      transition-all bg-card hover:bg-muted/50 text-foreground
-                      disabled:cursor-default
-                      ${extra}
-                    `}
-                  >
-                    {opt}
-                  </button>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Feedback & Next */}
-      <AnimatePresence>
-        {selected && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-full text-center space-y-3"
-          >
-            {isCorrect ? (
-              <p className="text-green-400 font-display text-sm">
-                ✓ Correct! +{10 + Math.floor((streak - 1) / 3) * 5} pts
-              </p>
-            ) : (
-              <p className="text-destructive font-display text-sm">
-                ✗ The answer was: {question.correctAnswer}
-              </p>
-            )}
-            <Button onClick={nextQuestion} className="gap-2" size="sm">
-              Next <ArrowRight size={14} />
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <QuizQuestionCard
+        question={question}
+        selected={selected}
+        isCorrect={isCorrect}
+        streak={streak}
+        handleAnswer={handleAnswer}
+        nextQuestion={nextQuestion}
+      />
     </div>
   );
 };
 
-const StatCard = ({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) => (
+const StatCard = ({ label, value, icon }: { label: string; value: number; icon: ReactNode }) => (
   <div className="p-3 rounded-lg bg-card border border-border">
     <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">{icon}<span className="text-xs">{label}</span></div>
     <span className="text-2xl font-display text-foreground">{value}</span>
