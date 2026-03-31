@@ -2,7 +2,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { elements, categoryLabels, categoryColors, type Element, type ElementCategory } from "@/data/elements";
 import ElementTile from "./ElementTile";
-import { X, Atom, Zap, Beaker } from "lucide-react";
+import { X, Atom, Zap, Beaker, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 import { ElementDetailModal } from "./ElementDetailModal";
 
@@ -22,9 +23,33 @@ const getGridPosition = (el: Element): { col: number; row: number } | null => {
 const PeriodicTable = () => {
   const [selectedElement, setSelectedElement] = useState<Element | null>(null);
   const [filterCategory, setFilterCategory] = useState<ElementCategory | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const matchSearch = (el: Element, query: string) => {
+    if (!query) return true;
+    const lowerQuery = query.toLowerCase();
+    return (
+      el.name.toLowerCase().includes(lowerQuery) ||
+      el.symbol.toLowerCase().includes(lowerQuery) ||
+      el.number.toString() === lowerQuery
+    );
+  };
 
   return (
     <div className="w-full">
+      {/* Search Bar */}
+      <div className="max-w-md mx-auto mb-6 relative">
+        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <Search size={16} className="text-muted-foreground" />
+        </div>
+        <Input 
+          type="text" 
+          placeholder="Search element by name, symbol, or number..." 
+          className="pl-9 h-10 w-full bg-card/50 backdrop-blur-sm border-border/50 text-foreground transition-all focus-visible:ring-1 focus-visible:ring-primary/50"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
       {/* Category Legend */}
       <div className="flex flex-wrap gap-2 mb-4 justify-center">
         {(Object.keys(categoryLabels) as ElementCategory[]).map((cat) => (
@@ -44,7 +69,7 @@ const PeriodicTable = () => {
       </div>
 
       {/* Grid */}
-      <div className="overflow-x-auto pb-4">
+      <div className="w-full overflow-x-auto pb-8">
         <div
           className="grid gap-[2px] mx-auto"
           style={{
@@ -68,8 +93,14 @@ const PeriodicTable = () => {
                 <ElementTile
                   element={el}
                   onClick={setSelectedElement}
-                  highlighted={filterCategory === el.category}
-                  dimmed={filterCategory !== null && filterCategory !== el.category}
+                  highlighted={
+                    (filterCategory !== null && filterCategory === el.category) ||
+                    (searchQuery.length > 0 && matchSearch(el, searchQuery))
+                  }
+                  dimmed={
+                    (filterCategory !== null && filterCategory !== el.category) ||
+                    (searchQuery.length > 0 && !matchSearch(el, searchQuery))
+                  }
                   size="md"
                 />
               </motion.div>

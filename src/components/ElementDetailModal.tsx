@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Atom, Zap, Beaker } from "lucide-react";
 import { categoryLabels, type Element } from "@/data/elements";
+import { AnimatedAtom } from "./AnimatedAtom";
 
 interface ElementDetailModalProps {
   selectedElement: Element | null;
@@ -34,14 +35,7 @@ export const ElementDetailModal = ({ selectedElement, onClose }: ElementDetailMo
             </button>
 
             <div className="flex items-start gap-4">
-              <div className={`w-20 h-20 rounded-lg flex flex-col items-center justify-center border-2 ${
-                `border-element-${selectedElement.category}`
-              } bg-muted/30`}>
-                <span className="text-xs text-muted-foreground">{selectedElement.number}</span>
-                <span className={`text-3xl font-bold text-element-${selectedElement.category}`}>
-                  {selectedElement.symbol}
-                </span>
-              </div>
+              <AnimatedAtom category={selectedElement.category} symbol={selectedElement.symbol} />
               <div className="flex-1">
                 <h2 className="text-xl font-display text-foreground">{selectedElement.name}</h2>
                 <p className="text-sm text-muted-foreground">{categoryLabels[selectedElement.category]}</p>

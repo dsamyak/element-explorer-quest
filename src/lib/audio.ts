@@ -1,27 +1,35 @@
 // A simple procedural synthesizer using the Web Audio API
 // This avoids needing to load external .mp3 or .wav files.
 
-const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+let audioCtx: AudioContext | null = null;
+
+const getAudioCtx = () => {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  }
+  return audioCtx;
+};
 
 const playTone = (frequency: number, type: OscillatorType, duration: number, vol = 0.1) => {
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') {
+    ctx.resume();
   }
   
-  const oscillator = audioCtx.createOscillator();
-  const gainNode = audioCtx.createGain();
+  const oscillator = ctx.createOscillator();
+  const gainNode = ctx.createGain();
 
   oscillator.type = type;
-  oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+  oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
 
-  gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+  gainNode.gain.setValueAtTime(vol, ctx.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
 
   oscillator.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
+  gainNode.connect(ctx.destination);
 
   oscillator.start();
-  oscillator.stop(audioCtx.currentTime + duration);
+  oscillator.stop(ctx.currentTime + duration);
 };
 
 export const playHoverSound = () => {
