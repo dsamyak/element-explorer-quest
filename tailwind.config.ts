@@ -12,6 +12,10 @@ export default {
         "2xl": "1400px",
       },
     },
+    fontFamily: {
+        display: ['Orbitron', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
+      },
     extend: {
       colors: {
         border: "hsl(var(--border))",
@@ -56,6 +60,18 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+        },
+        element: {
+          alkali: "hsl(var(--cat-alkali))",
+          alkaline: "hsl(var(--cat-alkaline))",
+          transition: "hsl(var(--cat-transition))",
+          "post-transition": "hsl(var(--cat-post-transition))",
+          metalloid: "hsl(var(--cat-metalloid))",
+          nonmetal: "hsl(var(--cat-nonmetal))",
+          halogen: "hsl(var(--cat-halogen))",
+          noble: "hsl(var(--cat-noble))",
+          lanthanide: "hsl(var(--cat-lanthanide))",
+          actinide: "hsl(var(--cat-actinide))",
         },
       },
       borderRadius: {
